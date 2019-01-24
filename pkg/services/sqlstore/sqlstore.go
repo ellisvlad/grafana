@@ -3,6 +3,7 @@ package sqlstore
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"path"
@@ -223,12 +224,9 @@ func (ss *SqlStore) buildConnectionString() (string, error) {
 		}
 	case migrator.POSTGRES:
 		var host, port = "127.0.0.1", "5432"
-		fields := strings.Split(ss.dbCfg.Host, ":")
-		if len(fields) > 0 && len(strings.TrimSpace(fields[0])) > 0 {
-			host = fields[0]
-		}
-		if len(fields) > 1 && len(strings.TrimSpace(fields[1])) > 0 {
-			port = fields[1]
+		host, port, err := net.SplitHostPort(ss.dbCfg.Host)
+		if err != nil {
+			return "", err
 		}
 		if ss.dbCfg.Pwd == "" {
 			ss.dbCfg.Pwd = "''"
